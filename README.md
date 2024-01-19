@@ -21,6 +21,7 @@ json_kg = JsonToKG()
 
 # 调用方法处理JSON数据并构建知识图谱
 # 示例：json_kg.process_and_insert_data('path/to/your/json/data')
+```
 
 ## TopicFusionManager
 
@@ -44,4 +45,4 @@ manager.keyword_fusion()
 
 # 执行相似性融合
 manager.similarity_fusion()
-
+```
