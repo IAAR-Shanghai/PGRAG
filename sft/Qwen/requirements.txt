@@ -1,0 +1,6 @@
+accelerate
+einops
+transformers_stream_generator==0.0.4
+scipy
+transformers==4.32.0
+tiktoken
