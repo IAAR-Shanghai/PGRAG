@@ -2,6 +2,7 @@
 import torch
 from transformers import BertTokenizer, BertModel
 from FlagEmbedding import FlagModel
+os.environ['TRANSFORMERS_CACHE'] = '../llms/BertModelCache'
 class TextSimilarityCalculator:
     def __init__(self):
         # 初始化模型和分词器
