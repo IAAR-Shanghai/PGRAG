@@ -56,50 +56,6 @@ class TopicFusionManager:
 
         print("关键词融合完成")
 
-    # def keyword_fusion(self):
-    #     """
-    #     执行关键词融合过程。
-    #     创建主题之间的连接基于共享的关键词，并创建超主题节点。
-    #     """
-    #     # 提取所有 Topic 节点的关键词
-    #     query = "MATCH (n:Topic) RETURN n.主题, n.关键词"
-    #     topics = self.graph.run(query).data()
-    #
-    #     # 创建主题节点到关键词的映射
-    #     topic_keywords = {topic['n.主题']: set(topic['n.关键词'].split()) for topic in topics if topic['n.关键词']}
-    #
-    #     # 使用 NetworkX 创建图
-    #     G = nx.Graph()
-    #
-    #     # 在共享关键词的主题节点之间添加边
-    #     for topic1, keywords1 in topic_keywords.items():
-    #         G.add_node(topic1, keywords=keywords1)
-    #         for topic2, keywords2 in topic_keywords.items():
-    #             if topic1 != topic2 and keywords1 & keywords2:
-    #                 G.add_edge(topic1, topic2)
-    #
-    #     # 为每个连通分量创建一个超主题节点并连接相关的主题节点
-    #     connected_components = list(nx.connected_components(G))
-    #     for component in connected_components:
-    #         super_topic_keywords = set()
-    #         for topic in component:
-    #             super_topic_keywords.update(G.nodes[topic]['keywords'])
-    #         super_topic_keywords = super_topic_keywords.pop()
-    #         # super_topic_keywords = ' '.join(super_topic_keywords)
-    #         # 创建超主题节点
-    #         super_topic_query = f"MERGE (s:SuperTopic {{关键词: '{super_topic_keywords}'}}) RETURN s"
-    #         super_topic = self.graph.run(super_topic_query).evaluate()
-    #         print(super_topic,"插入成功！")
-    #         # 将 Topic 节点连接到 SuperTopic
-    #         for topic_title in component:
-    #             relation_query = f"""
-    #             MATCH (t:Topic {{主题: $topic_title}}), (s:SuperTopic {{关键词: $super_topic_keywords}})
-    #             MERGE (t)-[:属于]->(s)
-    #             """
-    #             self.graph.run(relation_query, topic_title=topic_title, super_topic_keywords=super_topic_keywords)
-    #
-    #     print("关键词融合完成")
-
     def similarity_fusion(self):
         """
         执行相似性融合过程。
