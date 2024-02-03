@@ -155,6 +155,7 @@ class JsonToKG:
 
         if result == 0:
             print(f"Failed to update routing embedding for path: {path_str}")
+            
     def update_subtopic_embeddings(self):
         query_subtopics_paths = """
         MATCH path = (t:Topic)-[:基础链接*]->(st:SubTopic)
@@ -166,45 +167,3 @@ class JsonToKG:
         with ThreadPoolExecutor(max_workers=14) as executor:  # 你可以根据需要调整 max_workers 的值
             executor.map(self.update_single_subtopic_embedding, subtopics_paths)
 
-
-
-
-    # def update_subtopic_embeddings(self):
-    #     """
-    #     更新所有子主题节点的路由嵌入。
-    #     输入: 无
-    #     输出: 无（更新数据库中的节点）
-    #     """
-    #     query_subtopics_paths = """
-    #     MATCH path = (t:Topic)-[:基础链接*]->(st:SubTopic)
-    #     RETURN st, [node IN nodes(path) | CASE WHEN node:Topic THEN node.主题 WHEN node:SubTopic THEN node.路标 END] AS path_names
-    #     """
-    #     subtopics_paths = self.graph.run(query_subtopics_paths).data()
-    #
-    #     for subtopic_path in subtopics_paths:
-    #         subtopic = subtopic_path['st']
-    #         path_names = subtopic_path['path_names']
-    #
-    #         path_str = ' '.join(path_names)
-    #
-    #         # 计算路径嵌入
-    #         embedding = self.sim_calculator.calculate_embedding(path_str)
-    #
-    #         # 更新特定子主题节点的“路由嵌入”属性
-    #         query_update_embedding = """
-    #         MATCH path = (t:Topic)-[:基础链接*]->(st:SubTopic {路标: $subtopic_label})
-    #         WHERE [node IN nodes(path) | CASE WHEN node:Topic THEN node.主题 WHEN node:SubTopic THEN node.路标 END] = $path_names
-    #         SET st.路由嵌入 = $embedding
-    #         RETURN count(st) as updated
-    #         """
-    #         result = self.graph.run(query_update_embedding, subtopic_label=subtopic['路标'], path_names=path_names, embedding=str(embedding)).evaluate()
-    #
-    #         if result == 0:
-    #             print(f"Failed to update routing embedding for path: {path_str}")
-
-
-# 示例使用
-# dm = JsonToKG()
-# raw_doc_directory_path = r'../data_old/bm/mindmap_old_1'
-# dm.process_and_insert_data(raw_doc_directory_path)
-# dm.update_subtopic_embeddings()
