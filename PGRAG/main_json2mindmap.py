@@ -2,8 +2,8 @@
 import os
 import threading
 
-from PGRAG.PG_GEN.neo4j_data_prepare import JsonToKG
-from PGRAG.PG_GEN.TopicFusion import TopicFusionManager
+from PGRAG.pg_gen.neo4j_data_prepare import JsonToKG
+from PGRAG.pg_gen.TopicFusion import TopicFusionManager
 
 
 if __name__ == '__main__':
