@@ -7,6 +7,8 @@ import json
 import os
 import re
 from abc import ABC, abstractmethod
+import concurrent.futures
+from tqdm import tqdm
 
 from loguru import logger
 
@@ -16,7 +18,7 @@ class BaseLLM(ABC):
             self, 
             model_name: str = None, 
             temperature: float = 1.0, 
-            max_new_tokens: int = 4096,
+            max_new_tokens: int = 2048,
             top_p: float = 0.9,
             top_k: int = 5,
             **more_params
@@ -46,13 +48,36 @@ class BaseLLM(ABC):
     def extract_mindmap_in_json(self, news_body) -> dict:
         template = self._read_prompt_template('extract_mindmap_in_json.txt')
         query = template.format(news_body=news_body)
-        query.replace('{{', '{').replace('}}', '}')
-        # print(query)
+        query = query.replace('{{', '{').replace('}}', '}')
+
         respond = self.safe_request(query)
-        print(respond)
-        real_respond = respond.replace('```json', '').replace('```', '').strip()
-        json_obj = json.loads(real_respond)
-        return query, json_obj
+
+        try:
+            real_respond = respond.replace('```json', '').replace('```', '').strip()
+            # json_obj = json.loads(real_respond)
+            return query, real_respond
+        except json.JSONDecodeError:
+            raise ValueError("JSON字符串获取失败")
+
+    def process_input_output_pair(self, line_no, output_data):
+        output_dir = "data/eval/text2mindmap/"
+        os.makedirs(output_dir, exist_ok=True)
+        filename_output = os.path.join(output_dir, f"{line_no}.txt")
+
+        with open(filename_output, 'w', encoding='UTF-8') as output_file:
+            json.dump(output_data, output_file, ensure_ascii=False, indent=4)
+        print(f"结果已写入到{filename_output}")
+
+    def process_file(self, file_path, gpt_instance, error_log):
+        line_no = os.path.basename(file_path).replace('.txt', '')
+        try:
+            with open(file_path, 'r', encoding='UTF-8') as file:
+                news_body = file.read()
+                _, output_data = gpt_instance.extract_mindmap_in_json(news_body)
+                gpt_instance.process_input_output_pair(line_no, output_data)
+        except Exception as e:
+            with open(error_log, 'a') as log_file:
+                log_file.write(f"{file_path}: {e}\n")
 
     def query_deconstruction(self, question):
         template = self._read_prompt_template('query_deconstruction.txt')
@@ -63,21 +88,23 @@ class BaseLLM(ABC):
         print('respond:',respond)
         # real_respond = respond.replace('```json', '').replace('```', '').strip()
         # json_obj = json.loads(real_respond)
-        # return query
+        return query
 
-    def process_input_output_pair(self, input_data, output_data):
-        # 保存目录名
-        output_dir = "data/bm/mindmap/"
-        # 确保目录存在
-        os.makedirs(output_dir, exist_ok=True)
-        # 获取当前已有的文件数量
-        file_count = len(os.listdir(output_dir))
-        # 生成文件名，六位数字
-        filename_output = os.path.join(output_dir, f"{file_count + 1}.json")
-        # 写入到文件
-        with open(filename_output, 'w') as output_file:
-            output_file.write(str(output_data))
-        print(f"结果已写入到{filename_output}")
+    def question_answer(self, context, question):
+        # 读取模板
+        template = self._read_prompt_template('quest_answer.txt')
+        # 格式化查询
+        query = template.format(context=context, question=question)
+        # 发送查询并获取回答
+        answers = self.safe_request(query)
+        # 解析回答
+        pattern = r'<response>\n(.*?)\n</response>'
+        final_answers = re.findall(pattern, answers, re.DOTALL)
+        # 写入文件
+        with open('data_old/bm/final_answer/top10.txt', 'a', encoding='utf-8') as file:
+            file.write(' '.join(final_answers).replace('\n',' ') + '\n')
+        print('最终答案写入成功')
+        return final_answers
 
     @staticmethod
     def _read_prompt_template(filename: str) -> str:
