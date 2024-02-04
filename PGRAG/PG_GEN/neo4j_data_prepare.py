@@ -58,6 +58,77 @@ class JsonToKG:
 
         return all_json_contents
 
+    def process_and_insert_single_data(self, json_data):
+        emb_t = self.sim_calculator.calculate_embedding(str(json_data))
+
+        document_properties = {
+            "主题": json_data.get("主题", None),
+            "主题嵌入": str(emb_t),
+            "关键词": json_data.get("元信息", {}).get("关键词", None)
+        }
+
+        label = "Topic"
+        primary_key = "主题"
+        topic_paths = self.recursive_json_iterator(json_data.get("详情", {}))
+
+        for key, value in document_properties.items():
+            if value:
+                update_query = f"MERGE (d:{label} {{{primary_key}: $primary_key_value}}) SET d.{key} = $value RETURN d"
+                updated_node = self.graph.run(update_query,
+                                              parameters={"primary_key_value": document_properties[primary_key],
+                                                          "value": value}).evaluate()
+
+        topic_name = updated_node.get('主题')
+        print(f'名为“{topic_name}”的主题节点插入成功！')
+        # ...
+        for topic_path in topic_paths:
+            split_parts = topic_path.strip().strip("'").split("' '")
+            parts = [part.strip() for part in split_parts if part.strip()]
+            print('-------------------------------')
+            print('待插入主题路径：', parts)
+
+            # 插入子主题
+            for j, sub_topic_type in enumerate(parts[:-1]):
+                if j == 0:
+                    # 新的第一个子主题
+                    create_TST_query = "MATCH (d:Topic {主题: $topic_name}) MERGE (d)-[r:基础链接]->(st:SubTopic {路标: $sub_topic_type}) RETURN d, st"
+                    TST_result = self.graph.run(create_TST_query,
+                                                parameters={"topic_name": topic_name,
+                                                            "sub_topic_type": sub_topic_type}).data()
+                    print('主题到子主题插入成功！结果显示：', TST_result)
+                else:
+                    # 新的中间子主题
+                    match_query_parts = [f"-[r{k}:基础链接]->(pst{k}:SubTopic {{路标: $part{k}}})" for k, part in
+                                         enumerate(parts[:j], 1)]
+                    match_query = "MATCH (d:Topic {主题: $topic_name}) " + ''.join(match_query_parts)
+                    merge_query = f" WITH pst{j} MERGE (pst{j})-[r:基础链接]->(st:SubTopic {{路标: $sub_topic_type}}) RETURN st"
+                    create_STST_query = match_query + merge_query
+
+                    params = {"topic_name": topic_name, "sub_topic_type": sub_topic_type}
+                    for k, part in enumerate(parts[:j], 1):
+                        params[f"part{k}"] = part
+
+                    STST_result = self.graph.run(create_STST_query, parameters=params).data()
+                    print('插入的主题路径：', STST_result)
+                if j == len(parts) - 2:
+                    # 叶子主题
+                    emb_fp = self.sim_calculator.calculate_embedding(parts[0] + ' '.join(parts[1:]))
+                    fact = parts[j + 1]
+                    match_query_parts = [f"-[r{k}:基础链接]->(pst{k}:SubTopic {{路标: $part{k}}})" for k, part in
+                                         enumerate(parts[:j + 1], 1)]
+                    match_query = f"MATCH (d:Topic {{主题: $topic_name}}) " + ''.join(match_query_parts)
+                    merge_query = f" MERGE (c:Content {{事实: $fact, 路径嵌入: $fp}}) WITH pst{j + 1}, c MERGE (pst{j + 1})-[r:基础链接]->(c) RETURN c"
+
+                    create_STC_query = match_query + merge_query
+
+                    params = {"topic_name": topic_name, "fact": fact, "fp": str(emb_fp)}
+
+                    for k, part in enumerate(parts[:j + 1], 1):
+                        params[f"part{k}"] = part
+
+                    STC_result = self.graph.run(create_STC_query, parameters=params).data()
+                    print("**完整的路径插入成功！结果显示：", STC_result)
+
     def process_and_insert_data(self, raw_doc_directory_path):
         """
         处理并插入数据到Neo4j数据库。
@@ -66,74 +137,10 @@ class JsonToKG:
         """
         result = self.load_json_files(raw_doc_directory_path)
 
-        for i in list(result.keys()):
-            json_data = result.get(i, {})
-            emb_t = self.sim_calculator.calculate_embedding(str(json_data))
-
-            document_properties = {
-                "主题": json_data.get("主题", None),
-                "主题嵌入": str(emb_t),
-                "关键词": json_data.get("元信息", {}).get("关键词", None)
-            }
-
-            label = "Topic"
-            primary_key = "主题"
-            topic_paths = self.recursive_json_iterator(json_data.get("详情", {}))
-
-            for key, value in document_properties.items():
-                if value:
-                    update_query = f"MERGE (d:{label} {{{primary_key}: $primary_key_value}}) SET d.{key} = $value RETURN d"
-                    updated_node = self.graph.run(update_query, parameters={"primary_key_value": document_properties[primary_key], "value": value}).evaluate()
-
-            topic_name = updated_node.get('主题')
-            print(f'名为“{topic_name}”的主题节点插入成功！')
-            # ...
-            for topic_path in topic_paths:
-                split_parts = topic_path.strip().strip("'").split("' '")
-                parts = [part.strip() for part in split_parts if part.strip()]
-                print('-------------------------------')
-                print('待插入主题路径：', parts)
-
-                # 插入子主题
-                for j, sub_topic_type in enumerate(parts[:-1]):
-                    if j == 0:
-                        # 新的第一个子主题
-                        create_TST_query = "MATCH (d:Topic {主题: $topic_name}) MERGE (d)-[r:基础链接]->(st:SubTopic {路标: $sub_topic_type}) RETURN d, st"
-                        TST_result = self.graph.run(create_TST_query,
-                                                    parameters={"topic_name": topic_name, "sub_topic_type": sub_topic_type}).data()
-                        print('主题到子主题插入成功！结果显示：', TST_result)
-                    else:
-                        # 新的中间子主题
-                        match_query_parts = [f"-[r{k}:基础链接]->(pst{k}:SubTopic {{路标: $part{k}}})" for k, part in
-                                             enumerate(parts[:j], 1)]
-                        match_query = "MATCH (d:Topic {主题: $topic_name}) " + ''.join(match_query_parts)
-                        merge_query = f" WITH pst{j} MERGE (pst{j})-[r:基础链接]->(st:SubTopic {{路标: $sub_topic_type}}) RETURN st"
-                        create_STST_query = match_query + merge_query
-
-                        params = {"topic_name": topic_name, "sub_topic_type": sub_topic_type}
-                        for k, part in enumerate(parts[:j], 1):
-                            params[f"part{k}"] = part
-
-                        STST_result = self.graph.run(create_STST_query, parameters=params).data()
-                        print('插入的主题路径：', STST_result)
-                    if j == len(parts) - 2:
-                        # 叶子主题
-                        emb_fp = self.sim_calculator.calculate_embedding(parts[0] + ' '.join(parts[1:]))
-                        fact = parts[j + 1]
-                        match_query_parts = [f"-[r{k}:基础链接]->(pst{k}:SubTopic {{路标: $part{k}}})" for k, part in
-                                             enumerate(parts[:j + 1], 1)]
-                        match_query = f"MATCH (d:Topic {{主题: $topic_name}}) " + ''.join(match_query_parts)
-                        merge_query = f" MERGE (c:Content {{事实: $fact, 路径嵌入: $fp}}) WITH pst{j + 1}, c MERGE (pst{j + 1})-[r:基础链接]->(c) RETURN c"
-
-                        create_STC_query = match_query + merge_query
-
-                        params = {"topic_name": topic_name, "fact": fact, "fp": str(emb_fp)}
-
-                        for k, part in enumerate(parts[:j + 1], 1):
-                            params[f"part{k}"] = part
-
-                        STC_result = self.graph.run(create_STC_query, parameters=params).data()
-                        print("**完整的路径插入成功！结果显示：", STC_result)
+        num_pool = int(min(len(result.keys()), 20))
+        with ThreadPoolExecutor(max_workers=num_pool) as executor:
+            # 使用 map 方法来并行执行函数
+            res = executor.map(self.process_and_insert_single_data, list(result.values())[:3])
 
     def update_single_subtopic_embedding(self, subtopic_path):
         """

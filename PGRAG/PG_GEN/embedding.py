@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import torch
 from transformers import BertTokenizer, BertModel
 from FlagEmbedding import FlagModel
