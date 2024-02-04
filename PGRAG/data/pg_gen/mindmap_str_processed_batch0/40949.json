@@ -1,0 +1,12 @@
+{
+    "主题": "微软365Copilot新功能曝光可总结聊天内容",
+    "元信息":{
+        "关键词": "微软 365Copilot 新功能 总结 聊天内容"
+    },
+    "详情": {
+        "功能介绍": "微软在Inspire2023活动中，邀请EarlyAccessProgram成员在MicrosoftTeams上测试365Copilot新功能，目前已扩展通话（Phone）和聊天（Chat）两种模式。在通话方面，365Copilot已集成到TeamsPhone中，可以帮助用户汇总通话内容、梳理通话要点、以及查询某个通话关键词内容。此功能扩展到IP语音（VoIP）和公共交换电话网（PSTN）通话。在聊天方面，365Copilot可以总结聊天内容，提炼关键点，按主题组织聊天内容，帮助用户洞察聊天信息。",
+        "新功能扩展计划": "微软计划在7月为Teams带来23项新功能/新特性。",
+        "StevenStein观点": "微软技术社区的Steven Stein表示：“Copilot减少了管理不同聊天的工作量，不会中断你的工作流程，帮助你花更多的时间在重要的事情上”。",
+        "应用扩展计划": "微软还表示，365Copilot将会扩展到Teams，Loop，Planner，ToDo，Office.com和OneDriveforBusiness等应用中。"
+    }
+}
