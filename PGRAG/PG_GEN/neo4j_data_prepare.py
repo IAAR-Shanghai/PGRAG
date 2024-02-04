@@ -129,7 +129,7 @@ class JsonToKG:
                     STC_result = self.graph.run(create_STC_query, parameters=params).data()
                     print("**完整的路径插入成功！结果显示：", STC_result)
 
-    def process_and_insert_data(self, raw_doc_directory_path):
+    def process_and_insert_data(self, raw_doc_directory_path, top_n: int = 10):
         """
         处理并插入数据到Neo4j数据库。
         输入: raw_doc_directory_path - JSON文件所在的目录路径
@@ -140,7 +140,7 @@ class JsonToKG:
         num_pool = int(min(len(result.keys()), 20))
         with ThreadPoolExecutor(max_workers=num_pool) as executor:
             # 使用 map 方法来并行执行函数
-            res = executor.map(self.process_and_insert_single_data, list(result.values()))
+            res = executor.map(self.process_and_insert_single_data, list(result.values())[:top_n])
 
     def update_single_subtopic_embedding(self, subtopic_path):
         """
