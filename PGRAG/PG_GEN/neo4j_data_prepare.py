@@ -140,7 +140,7 @@ class JsonToKG:
         num_pool = int(min(len(result.keys()), 20))
         with ThreadPoolExecutor(max_workers=num_pool) as executor:
             # 使用 map 方法来并行执行函数
-            res = executor.map(self.process_and_insert_single_data, list(result.values())[:3])
+            res = executor.map(self.process_and_insert_single_data, list(result.values()))
 
     def update_single_subtopic_embedding(self, subtopic_path):
         """
