@@ -9,7 +9,7 @@ class JsonToKG:
         """
         初始化连接到Neo4j数据库和文本相似度计算器。
         """
-        self.graph = Graph("bolt://localhost:7687", auth=("neo4j", "1234"))
+        self.graph = Graph("bolt://localhost:7687", auth=("neo4j", "iaar1234"))
         self.sim_calculator = TextSimilarityCalculator()
 
     def recursive_json_iterator(self, json_data, path='', topic_paths=None):
@@ -159,7 +159,8 @@ class JsonToKG:
 
 
 # 示例使用
-# dm = JsonToKG()
-# raw_doc_directory_path = r'../data/bm/mindmap'
-# dm.process_and_insert_data(raw_doc_directory_path)
-# dm.update_subtopic_embeddings()
+if __name__ == '__main__':
+    dm = JsonToKG()
+    raw_doc_directory_path = r'../data/bm/mindmap'
+    dm.process_and_insert_data(raw_doc_directory_path)
+    dm.update_subtopic_embeddings()
