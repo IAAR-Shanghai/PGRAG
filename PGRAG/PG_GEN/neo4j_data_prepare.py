@@ -166,7 +166,6 @@ class JsonToKG:
     def update_subtopic_embeddings(self):
         query_subtopics_paths = """
         MATCH path = (t:Topic)-[:基础链接*]->(st:SubTopic)
-        WHERE not EXISTS(st.路由嵌入) 
         RETURN st, [node IN nodes(path) | CASE WHEN node:Topic THEN node.主题 WHEN node:SubTopic THEN node.路标 END] AS path_names
         """
         subtopics_paths = self.graph.run(query_subtopics_paths).data()
