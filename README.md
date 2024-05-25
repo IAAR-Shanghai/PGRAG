@@ -1,7 +1,7 @@
-﻿<h1 align="center">
-     PG-RAG: Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning
+<h1 align="center">
+    🍄 PG-RAG: Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning
 </h1>
-<p align="center"><img src="./assets/pg_gen.jpg" alt="" width="80%"></p>
+
 
 ## Introduction
 
@@ -9,12 +9,14 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 
 <p align="center"><img src="./assets/pgr.jpg" alt="" width="80%"></p>
 
+Additionally, we've made XinhuaHallucinations creation process accessible through our open-source pipeline, [UHGEval-dataset](https://github.com/IAAR-Shanghai/UHGEval-dataset). This enables researchers to craft customized datasets.
+
 <details><summary>Supported models of PG-RAG framework</summary>
 
 | Model Type | Loading Method               | Example Models                     | References                                                                                                             |
 |------------|------------------------------|------------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | `api`      | `requests`                   | OpenAI models | [OpenAI API](https://platform.openai.com/docs/introduction)|
-| `local`    | HuggingFace `Sentence transformers`   | `BAAI/bge-base-zh-v1.5`             | [HuggingFace `Sentence transformers`](https://sbert.net/)                                                 |
+| `local`    | HuggingFace `Sentence transformers`   | `BAAI/bge-large-zh-v1.5`             | [HuggingFace `Sentence transformers`](https://sbert.net/)                                                 |
 | `remote`   | `requests`                   | Internal use only                  | Not available to the public                                                                                            |
 
 </details>
@@ -136,17 +138,118 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 
 ## Installation
 
-Before using PG-RAG
+Before using PG-RAG:
 
 1. Ensure you have Python 3.9.0+
-2. `pip install -r requirements.txt`
+2. Install the required packages:
 
-## Pipline
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. Generate the mind maps for original texts using `pgrag/mindmap_generator.py`.
-2. Build pseudo-graph through `pgrag/pseudo_graph_constructor.py`.
-3. Use `pgrag/seed_context_recall.py` for seed topics recall.
-4. Use `pgrag/sub_pseudo_graph_retriever.py` final context extensions and context generation.
+3. Prerequisites
+
+- **JDK 17**: Ensure you have JDK 17 installed on your machine.
+- **Neo4j**: Download and install Neo4j. Start the Neo4j console using the following command:
+  
+  ```bash
+  neo4j console
+  ```
+
+## PG-RAG Pipeline
+
+This repository contains the implementation of the PG-RAG (Pseudo-Graph Retrieval Augmented Generation) pipeline. The pipeline consists of four main stages: mind map generation, pseudo-graph construction, seed context recall, and final context extension and generation.
+
+### Common Setup
+
+Before running the individual scripts, ensure the following configuration:
+
+```python
+graph_uri = "bolt://localhost:7687"
+graph_auth = ("neo4j", "password")
+emb_model_name = "/path/to/your/local/bge-base-zh-1.5"
+num_threads = 20
+topK = 8
+
+# Parameters for Pseudo-Graph Construction
+# Model name can be: gpt-3.5-turbo, gpt-4-0613, gpt-4-1106-preview
+model_name = 'gpt-3.5-turbo'
+raw_news_files_dir = 'data/raw_news/batch0'
+title_files_dir = 'data/pg_gen/batch0/title'
+fcis_files_dir = "data/pg_gen/batch0/textToVerificationText/"
+mindmaps_str_files_dir = "data/pg_gen/batch0/mindmap_str/"
+mindmaps_json_files_dir = "data/pg_gen/batch0/mindmap_json/"
+
+# Parameters for Knowledge Recall via Pseudo-Graph Retrieval
+eval_data_with_qe_and_qdse_file = 'data/eval/eval_data_with_qe_and_qdse.json'
+seed_topic_file = 'data/context_recall/pgrag/seed_topics.json'
+candidate_topic_file = 'data/context_recall/pgrag/candidate_topics.json'
+matrix_templates_file = 'data/context_recall/pgrag/matrix_templates.json'
+matrix_templates_with_sim_file = 'data/context_recall/pgrag/matrix_templates_with_sim.json'
+contexts_ids_file = 'data/context_recall/pgrag/contexts_ids.json'
+final_contexts_file = 'data/context_recall/pgrag/final_contexts.json'
+
+recall_top_m = 3 
+walk_top_m = 6  
+```
+
+Ensure Neo4j database is running and accessible at the specified `graph_uri`. Adjust file paths and model names as per your environment setup. Modify the parameters as needed to fine-tune the performance and results.
+
+## Steps to Execute
+
+1. **Generate Mind Maps**: Generate mind maps for original texts using `pgrag/mindmap_generator.py`.
+2. **Build Pseudo-Graph**: Construct a pseudo-graph through `pgrag/pseudo_graph_constructor.py`.
+3. **Seed Context Recall**: Recall seed topics using `pgrag/seed_context_recall.py`.
+4. **Final Context Extensions**: Perform final context extensions and context generation using `pgrag/sub_pseudo_graph_retriever.py`.
+
+### 1. Generate Mind Maps
+
+To generate mind maps from the original texts:
+
+```python
+# pgrag/mindmap_generator.py
+
+mindmap_generation = MindmapGeneration(model_name, num_threads, raw_news_files_dir, title_files_dir, fcis_files_dir, mindmaps_str_files_dir, mindmaps_json_files_dir)
+mindmap_generation.execute()
+```
+
+### 2. Build Pseudo-Graph
+
+To build the pseudo-graph:
+
+```python
+# pgrag/pseudo_graph_constructor.py
+
+inserter = Neo4jDataInserter(graph_uri, graph_auth, emb_model_name, num_threads)
+inserter.execute(raw_news_files_dir, mindmaps_json_files_dir)
+
+fusion = TopicAndContentFusion(graph_uri, graph_auth, emb_model_name)
+fusion.fuse_topics_and_contents()
+```
+
+### 3. Seed Context Recall
+
+To recall seed contexts:
+
+```python
+# pgrag/seed_context_recall.py   
+
+seed_context_recall = SeedContextRecall(graph_uri, graph_auth, emb_model_name, eval_data_with_qe_and_qdse_file, seed_topic_file, candidate_topic_file, recall_top_m, walk_top_m, num_threads, topK)
+seed_context_recall.execute()
+```
+
+### 4. Final Context Extensions
+
+To perform final context extensions and context generation:
+
+```python
+# pgrag/sub_pseudo_graph_retriever.py
+
+processor = PG_RAG_Processor(graph_uri, graph_auth, candidate_topic_file, matrix_templates_file, matrix_templates_with_sim_file, topK)
+processor.create_matrix_templates()
+processor.compute_similarity_matrices()
+processor.process_top_k_ids(contexts_ids_file, final_contexts_file)
+```
 
 ## Results for Experiment
 
