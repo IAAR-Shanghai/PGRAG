@@ -14,7 +14,7 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 | Model Type | Loading Method               | Example Models                     | References                                                                                                             |
 |------------|------------------------------|------------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | `api`      | `requests`                   | OpenAI models | [OpenAI API](https://platform.openai.com/docs/introduction)|
-| `local`    | HuggingFace `Sentence transformers`   | `BAAI/bge-large-zh-v1.5`             | [HuggingFace `Sentence transformers`](https://sbert.net/)                                                 |
+| `local`    | HuggingFace `Sentence transformers`   | `BAAI/bge-base-zh-v1.5`             | [HuggingFace `Sentence transformers`](https://sbert.net/)                                                 |
 | `remote`   | `requests`                   | Internal use only                  | Not available to the public                                                                                            |
 
 </details>
