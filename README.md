@@ -171,8 +171,7 @@ num_threads = 20
 topK = 8
 
 # Parameters for Pseudo-Graph Construction
-# Model name can be: gpt-3.5-turbo, gpt-4-0613, gpt-4-1106-preview
-model_name = 'gpt-3.5-turbo'
+model_name = 'gpt-3.5-turbo' # Model name can be: gpt-3.5-turbo, gpt-4-0613, gpt-4-1106-preview
 raw_news_files_dir = 'data/raw_news/batch0'
 title_files_dir = 'data/pg_gen/batch0/title'
 fcis_files_dir = "data/pg_gen/batch0/textToVerificationText/"
