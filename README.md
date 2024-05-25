@@ -1,5 +1,5 @@
 ﻿<h1 align="center">
-    🍄 PG-RAG: Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning
+     PG-RAG: Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning
 </h1>
 <p align="center"><img src="./assets/pg_gen.jpg" alt="" width="80%"></p>
 
