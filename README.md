@@ -140,9 +140,6 @@ Before using PG-RAG
 
 1. Ensure you have Python 3.9.0+
 2. `pip install -r requirements.txt`
-3. Prepare your model configuration file:
-    - Use [`pgrag/configs/real_config.py`].
-    - In this new file, specify configurations for the models you wish to evaluate, including details like the model's name, type, token, private key, etc.
 
 ## Pipline
 
