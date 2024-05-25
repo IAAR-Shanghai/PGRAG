@@ -10,8 +10,6 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 
 <p align="center"><img src="./assets/pgr.jpg" alt="" width="80%"></p>
 
-Additionally, we've made XinhuaHallucinations creation process accessible through our open-source pipeline, [UHGEval-dataset](https://github.com/IAAR-Shanghai/UHGEval-dataset). This enables researchers to craft customized datasets.
-
 <details><summary>Supported models of PG-RAG framework</summary>
 
 | Model Type | Loading Method               | Example Models                     | References                                                                                                             |
