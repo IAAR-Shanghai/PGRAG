@@ -41,16 +41,3 @@ class MindmapGeneration:
         self.generate_mindmaps_str()
         self.generate_mindmaps_json()
 
-# if __name__ == '__main__':
-#     num_threads = 20
-#     raw_news_files_dir = 'data/raw_news/batch0'
-#     title_files_dir = 'data/pg_gen/batch0/title'
-#     fcis_files_dir = "data/pg_gen/batch0/textToVerificationText/"
-#     mindmaps_str_files_dir = "data/pg_gen/batch0/mindmap_str/"
-#     mindmaps_json_files_dir = "data/pg_gen/batch0/mindmap_json/"
-
-#     # 模型名称可以是: gpt-3.5-turbo, gpt-4-0613, gpt-4-1106-preview
-#     model_name = 'gpt-3.5-turbo'
-
-#     mindmap_generation = MindmapGeneration(model_name, num_threads, raw_news_files_dir, title_files_dir, fcis_files_dir, mindmaps_str_files_dir, mindmaps_json_files_dir)
-#     mindmap_generation.execute()
