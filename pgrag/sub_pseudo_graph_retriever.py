@@ -259,18 +259,3 @@ class MatrixProcessor:
 
         return top_k_ids
 
-
-# graph_uri = "bolt://localhost:7628"
-# graph_auth = ("neo4j", "12345678")
-# candidate_topic_file = 'data/context_recall/pgrag/candidate_topics.json'
-# matrix_templates_file = 'data/context_recall/pgrag/matrix_templates.json'
-# matrix_templates_with_sim_file = 'data/context_recall/pgrag/matrix_templates_with_sim.json'
-# contexts_ids_file = 'data/context_recall/pgrag/contexts_ids.json'
-# final_contexts_file = 'data/context_recall/pgrag/final_contexts.json'
-# topK = 8
-
-# processor = PG_RAG_Processor(graph_uri, graph_auth, candidate_topic_file, 
-#                              matrix_templates_file, matrix_templates_with_sim_file, topK)
-# processor.create_matrix_templates()
-# processor.compute_similarity_matrices()
-# processor.process_top_k_ids(contexts_ids_file, final_contexts_file)
