@@ -8,20 +8,12 @@ from tqdm import tqdm
 
 class Neo4jDataInserter:
     def __init__(self, graph_uri, graph_auth, emb_model_name, max_workers=20):
-        """
-        初始化连接到Neo4j数据库和文本相似度计算器。
-        """
         self.graph = Graph(graph_uri, auth=graph_auth)
         self.emb_model = SentenceTransformer(emb_model_name)
         self.max_workers = max_workers
         print('初始化成功！')
 
     def recursive_json_iterator(self, json_data, path='', topic_paths=None):
-        """
-        递归解析JSON数据。
-        输入: json_data - JSON格式的数据
-        输出: topic_paths - 包含所有路径的列表
-        """
         if topic_paths is None:
             topic_paths = []
 
@@ -38,11 +30,6 @@ class Neo4jDataInserter:
         return topic_paths
 
     def load_json_files(self, mindmap_json_dir, raw_doc_dir):
-        """
-        从指定目录加载JSON文件。
-        输入: mindmap_json_dir - JSON文件所在的目录路径
-        输出: all_json_contents - 包含所有JSON内容的字典
-        """
         file_names = [file for file in os.listdir(mindmap_json_dir) if file.endswith('.json')]
         all_json_contents = {}
         all_news = []
@@ -268,16 +255,3 @@ class TopicAndContentFusion:
         self.cluster_nodes('Content', self.content_threshold)
         print("Fusion of topics and contents completed.")
 
-# if __name__ == '__main__':
-#     graph_uri = "bolt://localhost:7628"
-#     graph_auth = ("neo4j", "12345678")
-#     emb_model_name = "/data/simin/envs/emb_model/bge-large-zh"
-#     raw_doc_dir = 'data/raw_news/batch0'
-#     mindmap_json_dir = 'data/pg_gen/batch0/mindmap_json'
-#     max_workers = 20
-
-#     inserter = Neo4jDataInserter(graph_uri, graph_auth, emb_model_name, max_workers)
-#     inserter.execute(raw_doc_dir, mindmap_json_dir)
-
-#     fusion = TopicAndContentFusion(graph_uri, graph_auth, emb_model_name)
-#     fusion.fuse_topics_and_contents()
