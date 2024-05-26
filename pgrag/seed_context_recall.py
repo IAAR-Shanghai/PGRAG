@@ -167,21 +167,3 @@ class SeedContextRecall:
                 file.write(str(candidate_topics) + '\n')
 
 
-
-# if __name__ == '__main__':
-#     graph_uri = "bolt://localhost:7628"
-#     graph_auth = ("neo4j", "12345678")
-#     emb_model_name = "/mnt/data134/simin/envs/emb_model/bge-large-zh"
-#     eval_data_with_qe_and_qdse_file = 'data/eval/eval_data_with_qe_and_qdse.json'
-#     seed_topic_file = 'data/context_recall/pgrag/seed_topics.json'
-#     candidate_topic_file = 'data/context_recall/pgrag/candidate_topics.json'
-    
-#     recall_top_m = 3 
-#     walk_top_m = 6  
-#     num_threads = 20 
-#     top_k = 8       
-
-#     seed_context_recall = SeedContextRecall(graph_uri, graph_auth, emb_model_name, 
-#                                             eval_data_with_qe_and_qdse_file, seed_topic_file, 
-#                                             candidate_topic_file, recall_top_m, walk_top_m, num_threads, top_k)
-#     seed_context_recall.execute()
