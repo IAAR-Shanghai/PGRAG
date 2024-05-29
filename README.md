@@ -3,7 +3,11 @@
 </h1>
 
 <p align="center"><img src="./assets/pg_gen.jpg" alt="" width="80%"></p>
-
+<p align="center">
+    <a href="https://arxiv.org/abs/2405.16933">
+        <img alt="arXiv Paper" src="https://img.shields.io/badge/Paper-arXiv-red.svg">
+    </a>
+</p>
 ## Introduction
 
 PG-RAG proposes a pre-retrieval augmented generation method that introduces a _refinement_ step before the _indexing-retrieval-generation_ process, ensuring the accuracy of retrieved content from the outset. We leverage the self-learning capabilities of LLMs to transform documents into easily understandable and retrievable hierarchical indexes. This process naturally filters out noise and enhances information readability. By establishing connections between similar or complementary pieces of knowledge, we enable the retriever to function across multiple documents. During the knowledge retrieval phase, we use _pseudo-answers_ to assist the retriever in locating relevant information and perform walking in the matrices, thereby achieving accurate and rapid knowledge localization. Finally, we assemble the retrieved fact paths into a structured context, providing rich background information for LLMs to generate knowledge-grounded responses. 
@@ -252,3 +256,14 @@ processor.process_top_k_ids(contexts_ids_file, final_contexts_file)
 ## Results for Experiment
 
 <p align="center"><img src="./assets/main_results.jpg" alt=""></p>
+
+## Citation
+
+```BibTeX
+@article{PGRAG,
+    title={Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning},
+    author={Xun Liang and Simin Niu and Zhiyu li and Sensen Zhang and Shichao Song and Hanyu Wang and Jiawei Yang and Feiyu Xiong and Bo Tang and Chenyang Xi},
+    journal={arXiv preprint arXiv:2405.16933},
+    year={2024},
+}
+```
