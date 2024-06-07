@@ -182,7 +182,7 @@ class PG_RAG_Processor:
         return final_json
 
 class MatrixProcessor:
-    def create_control_and_pathway_matrices(self, matrix_sim, matrix_id, top_values, top_indices, support_threshold=0.03, continue_threshold=0.05):
+    def create_control_and_pathway_matrices(self, matrix_sim, matrix_id, top_values, top_indices, support_threshold=0.01, continue_threshold=0.02):
         control_matrices = []
         pathway_matrices = []
 
