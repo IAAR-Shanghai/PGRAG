@@ -3,11 +3,6 @@
 </h1>
 
 <p align="center"><img src="./assets/pg_gen.jpg" alt="" width="80%"></p>
-<p align="center">
-    <a href="https://arxiv.org/abs/2405.16933">
-        <img alt="arXiv Paper" src="https://img.shields.io/badge/Paper-arXiv-red.svg">
-    </a>
-</p>
 
 ## Introduction
 
@@ -257,14 +252,3 @@ processor.process_top_k_ids(contexts_ids_file, final_contexts_file)
 ## Results for Experiment
 
 <p align="center"><img src="./assets/main_results.jpg" alt=""></p>
-
-## Citation
-
-```BibTeX
-@article{PGRAG,
-    title={Empowering Large Language Models to Set up a Knowledge Retrieval Indexer via Self-Learning},
-    author={Xun Liang and Simin Niu and Zhiyu li and Sensen Zhang and Shichao Song and Hanyu Wang and Jiawei Yang and Feiyu Xiong and Bo Tang and Chenyang Xi},
-    journal={arXiv preprint arXiv:2405.16933},
-    year={2024},
-}
-```
