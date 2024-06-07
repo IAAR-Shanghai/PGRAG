@@ -28,14 +28,6 @@ class PG_RAG_Processor:
             path_embs.append(result['node_embs'])
         return path_ids, path_embs
 
-    def get_full_paths_for_node(self, node_id):
-        query = """
-            MATCH path=(t:Topic)-[:基础链接*]->(f: Content)
-            WHERE id(t) = $node_id OR id(f) = $node_id
-            RETURN [node in nodes(path) | id(node)] AS node_ids
-        """
-        result = self.graph.run(query, node_id=node_id).data()
-        return [record['node_ids'] for record in result]
 
     def create_matrix_templates(self):
         with open(self.candidate_topic_file, 'r', encoding='utf-8') as file:
@@ -132,10 +124,8 @@ class PG_RAG_Processor:
                 control_matrices, pathway_matrices = processor.create_control_and_pathway_matrices(matrix, matrix_id, top_values, top_indices)
                 temp_result_matrix = processor.color_matrices(control_matrices, pathway_matrices)
                 final_matrix += temp_result_matrix
-
             top_k_ids = processor.find_top_k_ids(final_matrix, matrix_id, self.topK)
             top_k_contexts = self.convert_paths_to_json(top_k_ids)
-
             contexts_ids = {
                 'question': question,
                 'top_k_ids': top_k_ids
@@ -151,29 +141,44 @@ class PG_RAG_Processor:
                 file.write(str(final_contexts) + '\n')
 
     def convert_paths_to_json(self, top_k_ids):
+        query = '''
+            MATCH (f)
+            WHERE id(f) IN $id_list
+            OPTIONAL MATCH path=(t:Topic)-[:基础链接*]->(f: Content)
+            WITH COLLECT(nodes(path)) AS all_nodes
+            RETURN DISTINCT all_nodes
+        '''
+        result = self.graph.run(query, id_list=top_k_ids).data()
+        all_paths = list(result[0]['all_nodes'])
+        # print('all_paths:', all_paths)
         final_json = {}
-        for path_id in top_k_ids:
-            all_paths = self.get_full_paths_for_node(path_id) 
-            for path_nodes in all_paths:
-                current_level = final_json 
-                for node_id in path_nodes:
-                    node = self.nodes[node_id]
-                    if 'Topic' in node['labels']:
-                        node_key = node['主题'].strip('\'').strip('。')
-                    elif 'SubTopic' in node['labels']:
-                        node_key = node['路标'].strip('\'')
-                    elif 'Content' in node['labels']:
-                        node_key = node['事实'].strip('\'')
-                    if node_key not in current_level:
-                        if 'Content' in node['labels']:
-                            current_level[node_key] = {}
-                        else:
-                            current_level[node_key] = {}
-                            current_level = current_level[node_key]
+        for path_nodes in all_paths:
+            current_level = final_json  # 初始化当前层级指向final_json
+            for node in path_nodes:
+                # 假设有方法从节点获取名称和类型
+                if 'Topic' in node.labels:
+                    node_key = node['主题'].strip('\'').strip('。')
+                    node_embedding = node['主题嵌入']  # 获取节点嵌入
+                elif 'SubTopic' in node.labels:
+                    node_key = node['路标'].strip('\'')
+                    node_embedding = node['路由嵌入']  # 获取节点嵌入
+                elif 'Content' in node.labels:
+                    node_key = node['事实'].strip('\'')
+                    node_embedding = node['路径嵌入']  # 获取节点嵌入
+                # 检查当前层级是否已存在节点键
+                if node_key not in current_level:
+                    # 如果节点是事实节点，直接添加
+                    if 'Content' in node.labels:
+                        current_level[node_key] = {} 
                     else:
-                        # 如果当前层级已存在节点键，更新当前层级的引用，除非是事实节点
-                        if 'Content' not in node['labels']:
-                            current_level = current_level[node_key]
+                        # 对于主题和子主题节点，创建新的字典来保存子节点
+                        current_level[node_key] = {} if 'Topic' in node.labels else {}
+                        # 更新当前层级的引用，指向新添加的节点
+                        current_level = current_level[node_key]
+                else:
+                    # 如果当前层级已存在节点键，更新当前层级的引用，除非是事实节点
+                    if 'Content' not in node.labels:
+                        current_level = current_level[node_key]
         return final_json
 
 class MatrixProcessor:
@@ -255,7 +260,6 @@ class MatrixProcessor:
                     break
                 last_id = id_val
             if last_id != -1:
-                top_k_ids.append(last_id)
+                top_k_ids.append(int(last_id))
 
         return top_k_ids
-
