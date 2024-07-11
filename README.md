@@ -225,7 +225,7 @@ inserter.execute(raw_news_files_dir, mindmaps_json_files_dir)
 To ensure efficient querying and retrieval of topic embeddings and fact embeddings, you need to manually create the following vector indexes in Neo4j:
 
 ```cypher
-CREATE VECTOR INDEX topic-embedding IF NOT EXISTS
+CREATE VECTOR INDEX topic-embeddings IF NOT EXISTS
 FOR (m:Topic)
 ON m.主题嵌入
 OPTIONS {indexConfig: {
@@ -233,7 +233,7 @@ OPTIONS {indexConfig: {
  `vector.similarity_function`: 'cosine'
 }}
 
-CREATE VECTOR INDEX fact-embedding IF NOT EXISTS
+CREATE VECTOR INDEX fact-embeddings IF NOT EXISTS
 FOR (m:Content)
 ON m.路径嵌入
 OPTIONS {indexConfig: {
