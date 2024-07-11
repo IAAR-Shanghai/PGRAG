@@ -225,7 +225,33 @@ To build the pseudo-graph:
 
 inserter = Neo4jDataInserter(graph_uri, graph_auth, emb_model_name, num_threads)
 inserter.execute(raw_news_files_dir, mindmaps_json_files_dir)
+```
 
+To ensure efficient querying and retrieval of topic embeddings and fact embeddings, you need to manually create the following vector indexes in Neo4j:
+
+```cypher
+CREATE VECTOR INDEX topic-embedding IF NOT EXISTS
+FOR (m:Topic)
+ON m.主题嵌入
+OPTIONS {indexConfig: {
+ `vector.dimensions`: 1024,
+ `vector.similarity_function`: 'cosine'
+}}
+
+CREATE VECTOR INDEX fact-embedding IF NOT EXISTS
+FOR (m:Content)
+ON m.路径嵌入
+OPTIONS {indexConfig: {
+ `vector.dimensions`: 1024,
+ `vector.similarity_function`: 'cosine'
+}}
+```
+
+These commands will create the necessary indexes for the `Topic` and `Content` nodes, respectively, with a vector dimension of 1024 and using the cosine similarity function for the embeddings.
+
+Please run the above commands in your Neo4j database before executing the main application to ensure all functionalities work as expected. Then, 
+
+```python
 fusion = TopicAndContentFusion(graph_uri, graph_auth, emb_model_name)
 fusion.fuse_topics_and_contents()
 ```
