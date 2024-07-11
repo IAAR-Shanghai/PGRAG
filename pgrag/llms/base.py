@@ -178,7 +178,6 @@ class BaseLLM(ABC):
         reference: str
     ) -> float:
         from text2vec import Similarity
-        # sim = Similarity(model_name_or_path="/path/to/local/text2vec-base-chinese")
-        sim = Similarity(model_name_or_path="shibing624/text2vec-base-chinese")
+        sim = Similarity(model_name_or_path="/path/to/local/text2vec-base-chinese")
         score = sim.get_score(continuation, reference)
         return score
