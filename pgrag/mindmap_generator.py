@@ -33,7 +33,7 @@ class MindmapGeneration:
     def generate_mindmaps_json(self):
         mindmap_str_files_to_process = [os.path.join(self.mindmaps_str_files_dir, file) for file in os.listdir(self.mindmaps_str_files_dir) if file.endswith('.txt')]
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
-            list(tqdm(executor.map(self.gpt.mindmap_str_to_json, mindmap_str_files_to_process, [self.gpt] * len(mindmap_str_files_to_process), [self.mindmaps_json_files_dir] * len(mindmap_str_files_to_process)), total=len(mindmap_str_files_to_process)))
+            list(tqdm(executor.map(self.gpt.mindmap_str_to_json, mindmap_str_files_to_process, [self.mindmaps_json_files_dir] * len(mindmap_str_files_to_process)), total=len(mindmap_str_files_to_process)))
 
     def execute(self):
         self.extract_mt()
