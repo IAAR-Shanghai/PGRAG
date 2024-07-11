@@ -120,13 +120,11 @@ class BaseLLM(ABC):
         line_no = os.path.basename(title_files_dir).replace('.txt', '')
         with open(title_files_dir, 'r', encoding='UTF-8') as file:
             title = file.read()
-        # ttv_path = os.path.join(fcis_files_dir, f"{line_no}.txt")
-        # with open(ttv_path, 'r', encoding='UTF-8') as file:
-        with open(fcis_files_dir, 'r', encoding='UTF-8') as file:
+        ttv_path = os.path.join(fcis_files_dir, f"{line_no}.txt")
+        with open(ttv_path, 'r', encoding='UTF-8') as file:
             text = file.read()
         output_data = gpt_instance.gen_mindmap(title, text)
         gpt_instance.process_input_output_pair(line_no, output_data, output_dir)
-
 
     def mindmap_str_to_json(self, mindmap_str_file_path, mindmap_json_dir):
         mindmap_json_file_path = os.path.join(mindmap_json_dir, os.path.basename(mindmap_str_file_path).replace('.txt', '.json'))
