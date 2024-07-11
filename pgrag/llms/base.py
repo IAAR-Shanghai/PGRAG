@@ -101,7 +101,7 @@ class BaseLLM(ABC):
         # 测试 BertScore 分数计算
         bert_score = self.bert_score(output_data, news_body)
         print(f"bert_score:'{bert_score}")
-        if rougeL_score >= 0.75 and bert_score >= 0.85:
+        if rougeL_score >= 0.15 and bert_score >= 0.85:
             gpt_instance.process_input_output_pair(line_no, output_data, output_dir)
         else:
             new_file_path = "data/raw_news/regen/"
@@ -120,32 +120,29 @@ class BaseLLM(ABC):
         line_no = os.path.basename(title_files_dir).replace('.txt', '')
         with open(title_files_dir, 'r', encoding='UTF-8') as file:
             title = file.read()
-        ttv_path = os.path.join(fcis_files_dir, f"{line_no}.txt")
-        with open(ttv_path, 'r', encoding='UTF-8') as file:
+        # ttv_path = os.path.join(fcis_files_dir, f"{line_no}.txt")
+        # with open(ttv_path, 'r', encoding='UTF-8') as file:
+        with open(fcis_files_dir, 'r', encoding='UTF-8') as file:
             text = file.read()
         output_data = gpt_instance.gen_mindmap(title, text)
         gpt_instance.process_input_output_pair(line_no, output_data, output_dir)
 
 
-    def mindmap_str_to_json(self, mindmap_str_dir, mindmap_json_dir):
-        file_names = [file for file in os.listdir(mindmap_str_dir) if file.endswith('.txt')]
-        for file_name in file_names:
-            mindmap_str_file_path = os.path.join(mindmap_str_dir, file_name)
-            base_name, _ = os.path.splitext(file_name)
-            mindmap_json_file_path = os.path.join(mindmap_json_dir, base_name + ".json")
-            with open(mindmap_str_file_path, 'r', encoding='utf-8') as file:
-                mindmap_str = file.read()
-                try:
-                    if '```json' in mindmap_str:
-                        real_content = mindmap_str.replace('```json', '').replace('```', '').strip()
-                        mindmap = json.loads(real_content)
-                    else:
-                        # 否则直接使用原始响应字符串
-                        mindmap = json.loads(mindmap_str)
-                    with open(mindmap_json_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(mindmap, f, ensure_ascii=False, indent=4)
-                except json.JSONDecodeError as e:
-                    print(f'JSON解析错误在文件{mindmap_str_file_path}', e)
+    def mindmap_str_to_json(self, mindmap_str_file_path, mindmap_json_dir):
+        mindmap_json_file_path = os.path.join(mindmap_json_dir, os.path.basename(mindmap_str_file_path).replace('.txt', '.json'))
+        with open(mindmap_str_file_path, 'r', encoding='utf-8') as file:
+            mindmap_str = file.read()
+            try:
+                if '```json' in mindmap_str:
+                    real_content = mindmap_str.replace('```json', '').replace('```', '').strip()
+                    mindmap = json.loads(real_content)
+                else:
+                    # 否则直接使用原始响应字符串
+                    mindmap = json.loads(mindmap_str)
+                with open(mindmap_json_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(mindmap, f, ensure_ascii=False, indent=4)
+            except json.JSONDecodeError as e:
+                print(f'JSON解析错误在文件{mindmap_str_file_path}', e)
 
 
     def query_deconstruction(self, question):
@@ -170,7 +167,8 @@ class BaseLLM(ABC):
         reference: str
     ) -> float:
         f = lambda text: list(jieba.cut(text))
-        rouge = evaluate.load('/path/to/local/rouge')
+        # rouge = evaluate.load('/path/to/local/rouge')
+        rouge = evaluate.load('rouge')
         results = rouge.compute(predictions=[continuation], references=[[reference]], tokenizer=f, rouge_types=['rougeL'])
         score = results['rougeL']
         return score
@@ -179,6 +177,8 @@ class BaseLLM(ABC):
         continuation: str,
         reference: str
     ) -> float:
-        sim = Similarity(model_name_or_path="/path/to/local/text2vec-base-chinese")
+        from text2vec import Similarity
+        # sim = Similarity(model_name_or_path="/path/to/local/text2vec-base-chinese")
+        sim = Similarity(model_name_or_path="shibing624/text2vec-base-chinese")
         score = sim.get_score(continuation, reference)
         return score
