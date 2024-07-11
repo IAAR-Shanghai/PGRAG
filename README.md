@@ -3,11 +3,6 @@
 </h1>
 
 <p align="center"><img src="./assets/pg_gen.jpg" alt="" width="80%"></p>
-<p align="center">
-    <a href="https://arxiv.org/abs/2405.16933">
-        <img alt="arXiv Paper" src="https://img.shields.io/badge/Paper-arXiv-red.svg">
-    </a>
-</p>
 
 ## Introduction
 
