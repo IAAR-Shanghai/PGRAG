@@ -112,7 +112,6 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 .
 ├── .github
 ├── .gitignore
-├── CITATION.bib
 ├── LICENSE
 ├── README.md
 ├── assets                  # Static files like images used in documentation
@@ -121,7 +120,8 @@ PG-RAG proposes a pre-retrieval augmented generation method that introduces a _r
 ├── requirements.txt
 └── pgrag                   # Source code for the project
     ├── configs             # Scripts for initializing model loading parameters
-    ├── data             # Intermediate result data  
+    ├── data             # Intermediate result data
+        ├── eval ── eval_data_with_qe_and_qdse_example.json   # Evaluate dataset samples
         ├── raw_news             # The original documents required for the retrieval library building
         ├── pg_gen             # Data during the pseudo-graph construction process  
         └── context_recall            # Data during the pseudo-graph retrieval process
