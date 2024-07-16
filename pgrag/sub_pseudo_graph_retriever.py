@@ -49,7 +49,6 @@ class PG_RAG_Processor:
             for i, embs in enumerate(path_embs):
                 for j, emb in enumerate(embs):
                     emb_matrix[i, j, :] = emb
-                    emb_matrix[i, -1, :] = emb[-1]
 
             matrix_templates = {
                 'question': question,
