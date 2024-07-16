@@ -85,28 +85,28 @@ class SeedContextRecall:
 
         return candidate_topics_ids, candidate_topics_names
 
-    def find_topN_paths_per_candidate_topic(self, candidate_topics, kpr_embedding):
-        query_content_and_path = '''
-            CALL db.index.vector.queryNodes('fact-embeddings', 10000, $embedding)
-            YIELD node AS similarContent, score
-            UNWIND $topics AS topic
-            MATCH path = (t:Topic)-[*]->(similarContent)
-            WHERE t.主题 = topic
-            WITH path, score, t
-            ORDER BY score DESC
-            LIMIT $topN
-            UNWIND nodes(path) AS p
-            WITH p, 
-                score, 
-                CASE WHEN p:Topic THEN p.主题 
-                    WHEN p:SubTopic THEN p.路标 
-                    WHEN p:Content THEN p.事实 
-                    ELSE null END AS pathAttribute
-            WHERE pathAttribute IS NOT NULL
-            RETURN collect(pathAttribute) AS pathAttributes, score
-        '''
-        results = self.graph.run(query_content_and_path, topics=candidate_topics, topN=self.top_k, embedding=kpr_embedding).data()
-        return results
+    # def find_topN_paths_per_candidate_topic(self, candidate_topics, kpr_embedding):
+    #     query_content_and_path = '''
+    #         CALL db.index.vector.queryNodes('fact-embeddings', 10000, $embedding)
+    #         YIELD node AS similarContent, score
+    #         UNWIND $topics AS topic
+    #         MATCH path = (t:Topic)-[*]->(similarContent)
+    #         WHERE t.主题 = topic
+    #         WITH path, score, t
+    #         ORDER BY score DESC
+    #         LIMIT $topN
+    #         UNWIND nodes(path) AS p
+    #         WITH p, 
+    #             score, 
+    #             CASE WHEN p:Topic THEN p.主题 
+    #                 WHEN p:SubTopic THEN p.路标 
+    #                 WHEN p:Content THEN p.事实 
+    #                 ELSE null END AS pathAttribute
+    #         WHERE pathAttribute IS NOT NULL
+    #         RETURN collect(pathAttribute) AS pathAttributes, score
+    #     '''
+    #     results = self.graph.run(query_content_and_path, topics=candidate_topics, topN=self.top_k, embedding=kpr_embedding).data()
+    #     return results
 
     def seed_topic_recall(self, question_info):
         question, question_embedding, qdse = question_info
